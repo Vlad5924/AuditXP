@@ -1,0 +1,27 @@
+[project]
+name = "auditxp-backend"
+version = "1.0.0"
+description = "AuditXP: Риск-менеджмент. Серверная часть"
+requires-python = ">=3.12"
+
+[tool.ruff]
+line-length = 79
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "C90"]
+# Depends() в аргументах по умолчанию является штатным приемом FastAPI
+ignore = ["B008"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.coverage.run]
+source = ["app"]
+# SQLAlchemy asyncio выполняет код сервисов внутри greenlet
+concurrency = ["greenlet", "thread"]
+omit = ["app/seed.py"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
