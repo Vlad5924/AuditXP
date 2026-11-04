@@ -1,7 +1,8 @@
-// Сценарные тесты интерфейса AuditXP (Playwright, браузер Chromium)
+// Сценарные тесты интерфейса AuditXP (Playwright)
 // Запуск при работающем сервере с демо-базой
 //   node e2e/scenarios.mjs http://127.0.0.1:8000/
-import { chromium } from "playwright";
+// Движок браузера задается переменной BROWSER (chromium, firefox, webkit)
+import { chromium, firefox, webkit } from "playwright";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -34,9 +35,12 @@ async function scenario(id, title, page, body) {
   }
 }
 
-const browser = await chromium.launch({
-  executablePath: process.env.CHROMIUM_PATH || undefined,
-  args: ["--lang=ru-RU"] });
+const ENGINE = process.env.BROWSER ?? "chromium";
+const engines = { chromium, firefox, webkit };
+const browser = await engines[ENGINE].launch(ENGINE === "chromium"
+  ? { executablePath: process.env.CHROMIUM_PATH || undefined,
+      args: ["--lang=ru-RU"] }
+  : {});
 const context = await browser.newContext({ viewport: { width: 1440, height: 900 },
   locale: "ru-RU" });
 const page = await context.newPage();

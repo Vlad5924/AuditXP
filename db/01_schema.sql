@@ -1,3 +1,6 @@
+-- AuditXP: Риск-менеджмент. Схема базы данных (PostgreSQL 16)
+-- Получена командой pg_dump --schema-only --no-owner auditxp
+-- Применение: psql -U auditxp -d auditxp -f db/01_schema.sql
 --
 -- PostgreSQL database dump
 --

@@ -15,7 +15,7 @@
 | `backend/app/etl` | Клиент ERP, очистка, карантин, сопоставление полей |
 | `backend/app/ml` | Признаки и стратегии скоринга (Isolation Forest, z-оценка) |
 | `backend/app/services` | Бизнес-логика: риски, отчеты, пользователи, уведомления |
-| `backend/tests` | 91 автоматический тест (pytest) и 3 теста производительности |
+| `backend/tests` | 93 автоматических теста (pytest) и 3 теста производительности |
 | `frontend/` | Клиентская часть: React 19, TypeScript, Vite |
 | `frontend/e2e` | Сценарные тесты интерфейса E2E-01..E2E-09 (Playwright) |
 | `db/` | Представления SQL и резервные копии демонстрационной БД |
@@ -76,7 +76,7 @@ python -m scripts.make_sample 2026-11-01 2026-11-03   # пример CSV
 ```bash
 cd backend
 pip install -r requirements-dev.txt
-pytest -v --cov=app                      # 91 тест, SQLite
+pytest -v --cov=app                      # 93 теста, SQLite
 TEST_DATABASE_URL=postgresql+asyncpg://auditxp:auditxp@localhost:5432/auditxp_test pytest
 pytest -m perf -s                        # тесты производительности PT-01..PT-03
 python scripts/benchmark_etl.py --url postgresql+asyncpg://...   # PER-01
