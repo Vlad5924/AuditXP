@@ -1,0 +1,30 @@
+/* Дизайн-токены темы «изумруд и янтарь» (ЛР6) */
+:root {
+  --color-primary: #0e6e5c;
+  --color-primary-dark: #084c40;
+  --color-accent: #e8930c;
+  --color-success: #3e9b4f;
+  --color-warning: #e8a13a;
+  --color-danger: #d64545;
+  --color-orange: #e8930c;
+  --color-yellow: #e8c93a;
+  --color-bg: #f6f5f1;
+  --color-surface: #ffffff;
+  --color-border: #e3e1da;
+  --color-text: #212926;
+  --color-muted: #7a8280;
+  --color-tint: #e7f2ee;
+  --radius-card: 10px;
+  --radius-control: 6px;
+  --shadow-card: 0 2px 8px rgba(33, 41, 38, 0.08);
+  --font-ui: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: Consolas, "Liberation Mono", monospace;
+  --gutter: 24px;
+  --header-height: 60px;
+  --context-height: 44px;
+  --text-h1: 700 24px/32px var(--font-ui);
+  --text-h2: 600 18px/26px var(--font-ui);
+  --text-body: 400 14px/20px var(--font-ui);
+  --text-caption: 400 12px/16px var(--font-ui);
+  --text-mono: 400 13px/18px var(--font-mono);
+}
