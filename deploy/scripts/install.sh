@@ -16,7 +16,7 @@ echo "2. Распаковка дистрибутива в $PREFIX"
 id auditxp >/dev/null 2>&1 || useradd --system --home "$PREFIX" \
     --shell /usr/sbin/nologin auditxp
 mkdir -p "$PREFIX"
-tar -xzf "$DIST" -C "$PREFIX" --strip-components=1
+tar -xzf "$DIST" -C "$PREFIX" --strip-components=1 --no-same-owner
 
 echo "3. Виртуальное окружение Python и зависимости"
 python3 -m venv "$PREFIX/venv"
@@ -43,21 +43,31 @@ if [ ! -f "$PREFIX/backend/.env" ]; then
       "$PREFIX/backend/.env.example" > "$PREFIX/backend/.env"
   chmod 600 "$PREFIX/backend/.env"
 fi
+chown -R auditxp:auditxp "$PREFIX"
 
 echo "6. Схема БД, справочники и представления"
 cd "$PREFIX/backend"
 sudo -u auditxp "$PREFIX/venv/bin/python" -m app.cli init-db
 PGPASSWORD=$DB_PASSWORD psql -h localhost -U "$DB_USER" -d "$DB_NAME" \
     -f "$PREFIX/db/02_views.sql"
-chown -R auditxp:auditxp "$PREFIX"
 
 echo "7. Служба API и веб-сервер"
+CERT=/etc/ssl/auditxp
+if [ ! -f "$CERT/auditxp.crt" ]; then
+  echo "Сертификат не найден, создается временный самоподписанный"
+  mkdir -p "$CERT"
+  openssl req -x509 -nodes -newkey rsa:2048 -days 365 \
+      -subj "/CN=auditxp.goldberg-soft.by" \
+      -keyout "$CERT/auditxp.key" -out "$CERT/auditxp.crt"
+  chmod 600 "$CERT/auditxp.key"
+fi
 install -m 644 "$PREFIX/deploy/systemd/auditxp-api.service" \
     /etc/systemd/system/auditxp-api.service
 install -m 644 "$PREFIX/deploy/nginx/auditxp.conf" \
     /etc/nginx/sites-available/auditxp.conf
 ln -sf /etc/nginx/sites-available/auditxp.conf \
     /etc/nginx/sites-enabled/auditxp.conf
+rm -f /etc/nginx/sites-enabled/default
 systemctl daemon-reload
 systemctl enable --now auditxp-api
 nginx -t && systemctl reload nginx
