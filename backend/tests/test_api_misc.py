@@ -28,3 +28,33 @@ async def test_openapi_published(client):
     """ST-21. Спецификация OpenAPI описывает все ресурсы (SI-01)."""
     spec = (await client.get("/api/openapi.json")).json()
     assert len(spec["paths"]) >= 30
+
+
+class _BrokenSession:
+    """Сессия, имитирующая отказ соединения с СУБД."""
+
+    async def execute(self, *_args, **_kwargs):
+        raise ConnectionRefusedError(111, "Connection refused")
+
+    async def scalar(self, *_args, **_kwargs):
+        raise ConnectionRefusedError(111, "Connection refused")
+
+
+async def test_database_unavailable_returns_503(session, users):
+    """ST-25. При отказе СУБД API отвечает 503 с понятным сообщением."""
+    from httpx import ASGITransport, AsyncClient
+
+    from app.api.deps import get_db
+    from app.main import create_app
+
+    app = create_app()
+    app.dependency_overrides[get_db] = lambda: _BrokenSession()
+    async with AsyncClient(transport=ASGITransport(app=app),
+                           base_url="http://test") as http:
+        health = await http.get("/api/v1/health")
+        assert health.status_code == 503
+        assert health.json()["database"] == "unavailable"
+        login = await http.post("/api/v1/auth/login", json={
+            "login": "zhdanko", "password": "Auditor2026"})
+        assert login.status_code == 503
+        assert "недоступна" in login.json()["detail"]

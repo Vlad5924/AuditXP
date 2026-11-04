@@ -15,8 +15,9 @@
 | `backend/app/etl` | Клиент ERP, очистка, карантин, сопоставление полей |
 | `backend/app/ml` | Признаки и стратегии скоринга (Isolation Forest, z-оценка) |
 | `backend/app/services` | Бизнес-логика: риски, отчеты, пользователи, уведомления |
-| `backend/tests` | 88 автоматических тестов (pytest) и 3 теста производительности |
+| `backend/tests` | 91 автоматический тест (pytest) и 3 теста производительности |
 | `frontend/` | Клиентская часть: React 19, TypeScript, Vite |
+| `frontend/e2e` | Сценарные тесты интерфейса E2E-01..E2E-09 (Playwright) |
 | `db/` | Представления SQL и резервные копии демонстрационной БД |
 | `deploy/` | nginx, systemd, Docker Compose, скрипты установки и резервного копирования |
 | `samples/` | Пример выгрузки ERP в формате CSV |
@@ -75,13 +76,15 @@ python -m scripts.make_sample 2026-11-01 2026-11-03   # пример CSV
 ```bash
 cd backend
 pip install -r requirements-dev.txt
-pytest -v --cov=app                      # 88 тестов, SQLite
+pytest -v --cov=app                      # 91 тест, SQLite
 TEST_DATABASE_URL=postgresql+asyncpg://auditxp:auditxp@localhost:5432/auditxp_test pytest
 pytest -m perf -s                        # тесты производительности PT-01..PT-03
 python scripts/benchmark_etl.py --url postgresql+asyncpg://...   # PER-01
 python scripts/load_test.py --users 20  # PER-02, PER-03 при запущенном сервере
 ruff check app tests scripts
 cd ../frontend && npm test && npm run lint
+npx playwright install chromium          # один раз для сценарных тестов
+npm run e2e -- http://127.0.0.1:8000/    # E2E-01..E2E-09 на демо-базе
 ```
 
 ## Развертывание на сервере

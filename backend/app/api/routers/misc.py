@@ -2,11 +2,13 @@
 from datetime import date, timedelta
 
 from fastapi import APIRouter, Depends, Query
+from fastapi.responses import JSONResponse
 from sqlalchemy import func, select, text, update
 
 from app.api.deps import current_user, get_db, require_roles
 from app.api.schemas import risk_out
 from app.core.config import get_settings
+from app.core.errors import DB_UNAVAILABLE_ERRORS
 from app.db.models import ErpTransaction, Notification
 from app.domain.enums import RoleName
 from app.repository.audit_repository import AuditRepository
@@ -26,10 +28,15 @@ async def default_period(session) -> tuple[date, date]:
 
 @router.get("/health", summary="Проверка работоспособности")
 async def health(session=Depends(get_db)):
-    await session.execute(text("SELECT 1"))
     s = get_settings()
-    return {"status": "ok", "database": "ok", "version": s.app_version,
+    body = {"status": "ok", "database": "ok", "version": s.app_version,
             "environment": s.app_env}
+    try:
+        await session.execute(text("SELECT 1"))
+    except DB_UNAVAILABLE_ERRORS:
+        body.update(status="degraded", database="unavailable")
+        return JSONResponse(body, status_code=503)
+    return body
 
 
 @router.get("/dashboard/overview", summary="Рабочий стол «Обзор»")

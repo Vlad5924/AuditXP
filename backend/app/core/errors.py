@@ -1,4 +1,12 @@
 """Иерархия прикладных исключений и их HTTP-коды."""
+from sqlalchemy.exc import InterfaceError, OperationalError
+from sqlalchemy.exc import TimeoutError as PoolTimeoutError
+
+# ошибки, означающие недоступность СУБД (ответ 503 вместо 500)
+DB_UNAVAILABLE_ERRORS = (OperationalError, InterfaceError, PoolTimeoutError,
+                         ConnectionError, TimeoutError)
+DB_UNAVAILABLE_MESSAGE = ("База данных временно недоступна, повторите "
+                          "запрос позже")
 
 
 class DomainError(Exception):

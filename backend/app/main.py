@@ -11,7 +11,11 @@ from fastapi.staticfiles import StaticFiles
 from app import __version__
 from app.api.routers import auth, etl, heatmap, misc, reports, risks, users
 from app.core.config import get_settings
-from app.core.errors import DomainError
+from app.core.errors import (
+    DB_UNAVAILABLE_ERRORS,
+    DB_UNAVAILABLE_MESSAGE,
+    DomainError,
+)
 from app.db.session import dispose_engine, get_sessionmaker, init_models
 
 logging.basicConfig(level=logging.INFO,
@@ -65,6 +69,14 @@ def create_app() -> FastAPI:
     async def domain_error(_request: Request, exc: DomainError):
         return JSONResponse({"detail": exc.message},
                             status_code=exc.status_code)
+
+    async def db_unavailable(_request: Request, exc: Exception):
+        logging.getLogger("auditxp").error("СУБД недоступна: %r", exc)
+        return JSONResponse({"detail": DB_UNAVAILABLE_MESSAGE},
+                            status_code=503)
+
+    for error in DB_UNAVAILABLE_ERRORS:
+        app.add_exception_handler(error, db_unavailable)
 
     for module in (auth, etl, risks, heatmap, reports, users, misc):
         app.include_router(module.router, prefix="/api/v1")
