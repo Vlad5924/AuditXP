@@ -1,0 +1,21 @@
+# /etc/systemd/system/auditxp-api.service
+[Unit]
+Description=AuditXP API (FastAPI, uvicorn)
+After=network.target postgresql.service
+Requires=postgresql.service
+
+[Service]
+Type=simple
+User=auditxp
+Group=auditxp
+WorkingDirectory=/opt/auditxp/backend
+EnvironmentFile=/opt/auditxp/backend/.env
+ExecStart=/opt/auditxp/venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 2 --proxy-headers
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+ProtectSystem=full
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
